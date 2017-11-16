@@ -26,7 +26,7 @@ csvfile.close()
 
 
 
-plt.figure(figsize=(10, 6)) 
+plt.figure(figsize=(12, 6)) 
 ax = plt.subplot(111)
 
 plt.title("Total number of Comments with Negative Sentiment", fontsize=16) 
@@ -37,10 +37,30 @@ ax.get_xaxis().tick_bottom()
 ax.get_yaxis().tick_left()    
 i = 0
 count = 0
+neg_comments={}
+pos_comments={}
+
 for l, s in comments_labeled.items():
-    if s[0] is 'neg': 
-        count += 1
-    plt.plot([0, s[1]], [0, count], 'bo')
+    if s[0] == 'neg':
+        neg_comments[l]=s[1]
+    if s[0] == 'pos':
+        pos_comments[l]=s[1]
+
+#print(neg_comments)
+#for negative comments
+for k, s in neg_comments.items():
+    count += 1
+    plt.plot(s, sum(x == s for x in neg_comments.values()), 'r--')
     plt.axis([0, 1, 0, 39980])
+plt.xlim(0, 1)
 plt.show()
 
+"""
+#for positive comments
+for k, s in neg_comments.items():
+    count += 1
+    plt.plot(s, sum(x == s for x in neg_comments.values()), 'r--')
+    plt.axis([0, 1, 0, 39980])
+
+plt.show()
+"""
