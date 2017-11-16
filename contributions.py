@@ -2,6 +2,15 @@ import mysql.connector
 import csv 
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib import colors as mcolors
+import datetime 
+
+colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+
+# Sort colors by hue, saturation, value and name.
+by_hsv = sorted((tuple(mcolors.rgb_to_hsv(mcolors.to_rgba(color)[:3])), name)
+                for name, color in colors.items())
+colors = [name for hsv, name in by_hsv]
 
 hostname = 'localhost'
 username = '' # no privlidges set so this works
@@ -16,7 +25,7 @@ def queryDB(conn, query) :
     cur.execute(query)
     return cur.fetchall()
 
-project_ids = queryDB(conn, "select id from projects where forked_from is null;")
+project_ids = queryDB(conn, "select id from projects where forked_from is null;")[:-1]
 
 projects_to_commits =  {} 
 for ID in [x[0] for x in project_ids]:
@@ -27,12 +36,27 @@ for ID in [x[0] for x in project_ids]:
 
 conn.close()
 
-fig = plt.figure()
-for ID,datetimes in projects_to_commits.items():
-  dates = matplotlib.dates.date2num(datetimes)
-  plt.plot_date(datetimes,range(1, len(dates) + 1), 'b-')
+plt.figure(figsize=(9, 9)) 
+ax = plt.subplot(111)
+plt.title("Total Number of Project Commits Over Time for the Top 90 Repositories on Github", fontsize=16) 
+plt.ylabel("Total Number of Commits", fontsize=12)
+  
+# Ensure that the axis ticks only show up on the bottom and left of the plot.    
+# Ticks on the right and top of the plot are generally unnecessary chartjunk.    
+ax.get_xaxis().tick_bottom()    
+ax.get_yaxis().tick_left()    
 
-fig.autofmt_xdate()
+i = 0
+min_date = datetime.date(2010,1,1)
+max_date = min_date
+for ID,datetimes in projects_to_commits.items():
+  plt.plot_date(datetimes,range(1, len(datetimes) + 1), colors[i])
+  i+=1
+  if datetimes[-1].date() > max_date:
+    max_date = datetimes[-1].date()
+
+min_date = datetime.date(2010,1,1)
+plt.xlim(min_date,max_date)
 plt.show()
 
 
