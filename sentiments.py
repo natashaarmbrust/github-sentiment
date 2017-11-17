@@ -14,11 +14,11 @@ colors = [name for hsv, name in by_hsv]
 
 #Reading csv file
 comments_labeled = {}
-with open(path+'comments_labeled.csv', 'r') as csvfile:
-    fieldnames = ['Comment', 'Label', 'Score']
+with open(path+'pr_comments_labeled.csv', 'r') as csvfile:
+    fieldnames = ['ID', 'Created_at', 'Comment', 'Label', 'Score']
     reader = csv.reader(csvfile)
     for row in reader:
-      comments_labeled[row[0]]=[row[1], row[2]]
+      comments_labeled[row[0]]=[row[1], row[2], row[3], row[4]]
   
 csvfile.close()
 
@@ -26,7 +26,7 @@ csvfile.close()
 
 
 
-plt.figure(figsize=(12, 6)) 
+plt.figure(figsize=(10, 7)) 
 ax = plt.subplot(111)
 
 plt.title("Total number of Comments with Negative Sentiment", fontsize=16) 
@@ -39,20 +39,26 @@ i = 0
 count = 0
 neg_comments={}
 pos_comments={}
+neu_comments={}
 
 for l, s in comments_labeled.items():
-    if s[0] == 'neg':
-        neg_comments[l]=s[1]
-    if s[0] == 'pos':
-        pos_comments[l]=s[1]
+    if s[3] == 'neg': #label
+        neg_comments[l]=s[4] #score
+    if s[3] == 'pos':
+        pos_comments[l]=s[4]
+    else:
+        neu_coemments[l]=s[4]
 
 #print(neg_comments)
 #for negative comments
 for k, s in neg_comments.items():
     count += 1
     plt.plot(s, sum(x == s for x in neg_comments.values()), 'r--')
-    plt.axis([0, 1, 0, 39980])
-plt.xlim(0, 1)
+    plt.axis([0, 1, 0, len(comments_labeled)])
+    plt.xlim(0, 1)
+
+    plt.show()
+
 plt.show()
 
 """
@@ -60,7 +66,7 @@ plt.show()
 for k, s in neg_comments.items():
     count += 1
     plt.plot(s, sum(x == s for x in neg_comments.values()), 'r--')
-    plt.axis([0, 1, 0, 39980])
+    plt.axis([0, 1, 0, len(comments_labeled)])
 
 plt.show()
 """
