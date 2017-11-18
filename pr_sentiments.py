@@ -44,6 +44,9 @@ for ID, PR_ID in project_ids:
     ss = sid.polarity_scores(comment)
     dates.append(date)
     scores.append(ss['compound'])
+    """    if ss['compound'] < -0.75 or ss['compound'] > 0.75: 
+      print comment 
+      print ss"""
 
   if len(dates) > 0:
     if ID in projects_to_pr_comments:
@@ -76,8 +79,9 @@ conn.close()
    
 
 j = 0 
+ 
 for ID,date_scores in projects_to_pr_comments.items():
-  fig = plt.figure(figsize=(9, 9)) 
+  fig = plt.figure(figsize=(9, 9))
   ax = plt.subplot(111)
   plt.title("Total Commits and Sentiment Analysis for Pull Requests Over Time For Repository {} on Github".format(ID), fontsize=10) 
   #plt.ylabel("Average Sentiment", fontsize=12)
@@ -87,18 +91,26 @@ for ID,date_scores in projects_to_pr_comments.items():
   indices = [i[0] for i in sorted(enumerate(date_scores[0]), key=lambda x:x[1])]
   sorted_dates = []
   sorted_scores = []
-  current_sum = 0 
+  current_sum = 0.0
   count = 0
   for i in indices:
     sorted_dates.append(date_scores[0][i])
     current_sum += date_scores[1][i]
     count += 1.0
-    sorted_scores.append(current_sum / count)
-  plt.plot_date(sorted_dates,sorted_scores, '-b', label="Average Sentiment")
+    sorted_scores.append(current_sum)
+  sorted_scores = [i / current_sum for i in sorted_scores]
+  plt.plot_date(sorted_dates,sorted_scores, '-b', label="Total Sentiment")
 
-  datetime = projects_to_commits[ID]
+  datetime_p = projects_to_commits[ID]
+  datetime = [] 
+  for d in datetime_p:
+    if d >= date_scores[0][0]:
+      datetime.append(datetime_p)
+
   normalized = [i / float(len(datetime)) for i in range(1, len(datetime) + 1)]
   plt.plot_date(datetime,normalized, '-g', label="Total Commits (Normalized)")
   ax.legend(loc=0) 
-  fig.savefig('plots/total_commits_and_average_sentiment/{}_total_commits_and_average_sentiment.png'.format(ID))
+  fig.savefig('plots/total_commits_and_total_sentiment_date_normalized/{}_total_commits_and_total_sentiment.png'.format(ID))
   plt.close(fig) 
+
+#plt.show()
